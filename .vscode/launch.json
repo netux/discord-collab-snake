@@ -1,0 +1,12 @@
+{
+	"configurations": [
+		{
+			"name": "bot.py",
+			"type": "python",
+			"request": "launch",
+			"program": "${workspaceFolder}/bot.py",
+			"console": "internalConsole",
+			// "justMyCode": false
+		}
+	]
+}
