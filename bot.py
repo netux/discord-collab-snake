@@ -26,17 +26,19 @@ def to_canvas_coord(coords: Vector):
 	return coords * 4 + (1, 1)
 
 def format_time(date):
-	parts = filter(lambda x: x is not None, [
+	parts = list(filter(lambda x: x is not None, [
 		f'{date.hours} hour' + ('s' if date.hours == 1 else '') if date.hours != 0 else None,
 		f'{date.minutes} minute' + ('s' if date.minutes == 1 else '') if date.minutes != 0 else None,
 		f'{date.seconds} second' + ('s' if date.seconds == 1 else '') if date.seconds != 0 else None
-	])
+	]))
 
 	result = ''
 	for i, s in enumerate(parts):
 		result += s
-		if i != len(parts):
+		if i != len(parts) - 1:
 			result += ' and ' if i == len(parts) - 1 else ', '
+
+	return result
 
 
 def create_checkerboard_bg_img() -> Image:
@@ -59,7 +61,7 @@ def create_checkerboard_bg_img() -> Image:
 	for y in range(board_size.h):
 		img_y = 3 + y * 4
 		draw.line((0, img_y, canvas_size.w, img_y))
-	
+
 	del draw
 	return img
 base_img = create_checkerboard_bg_img()
@@ -114,7 +116,7 @@ class CollabSnake(commands.Bot):
 			elif move.direction == RIGHT:
 				dir_vector = Vector(-1, 0)
 				end_offset = Vector(1, 0)
-			
+
 			for i in range(move.amount):
 				tile_position = labs(tile_position + dir_vector)
 				tile_center = to_canvas_coord(tile_position)
@@ -193,9 +195,9 @@ class CollabSnake(commands.Bot):
 				elif reaction.count > best.count:
 					best = reaction
 					tie = False
-			
+
 			winner = best.emoji
-			
+
 		return winner if not tie else None
 
 
@@ -232,9 +234,11 @@ class CollabSnake(commands.Bot):
 				await self.last_msg.add_reaction(RIGHT)
 
 	async def advance(self):
-		if self.has_ended:
-			game = SnakeGame(board_size)
-			self.has_ended = False
+		if self.game.has_ended:
+			self.last_msg = None
+			self.game = SnakeGame(board_size)
+			self.game.has_ended = False
+			return
 
 		if self.last_msg:
 			# update last_msg with the one in cache (https://github.com/Rapptz/discord.py/issues/861)
@@ -255,7 +259,7 @@ class CollabSnake(commands.Bot):
 					await self.wait_for('reaction_add', check=check)
 			if tie_message_appended:
 				await self.last_msg.edit(content=prev_last_message)
-			
+
 			self.game.advance(direction)
 
 		img = self.create_image()
@@ -263,7 +267,7 @@ class CollabSnake(commands.Bot):
 
 		if self.game.has_ended:
 			self.has_ended = True
-	
+
 	@tasks.loop(**send_interval)
 	async def advance_task(self):
 		try:
@@ -275,7 +279,7 @@ class CollabSnake(commands.Bot):
 
 			print(e)
 			print_exc(file=stdout)
-	
+
 	@advance_task.after_loop
 	async def after_advance_task(self):
 		if self.advance_task.failed():

@@ -49,7 +49,7 @@ class Snake:
 				movement_steps -= 1
 				if self.movements[0].amount == 0:
 					self.movements.pop(0)
-	
+
 	def occupies_body(self, position: Vector):
 		last_movement_end = self.head_position
 		for move in reversed(self.movements):
@@ -96,7 +96,7 @@ class SnakeGame:
 		if self.snake.occupies_body(self.snake.head_position):
 			self.has_ended = True
 			return
-		
+
 		if self.is_snake_eating():
 			self.snake.size += 1
 			while self.is_snake_eating() or self.snake.occupies_body(self.food_position):
