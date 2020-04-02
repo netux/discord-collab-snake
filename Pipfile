@@ -6,8 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-discord-py = "*"
-pillow = "*"
+discord-py = ">=1.2.3"
+Pillow = ">=6.2.2"
 
 [requires]
 python_version = "3.7"
